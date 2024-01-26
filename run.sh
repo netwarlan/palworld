@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+echo "
+╔═══════════════════════════════════════════════╗
+║                                               ║
+║       _  _____________      _____   ___       ║
+║      / |/ / __/_  __/ | /| / / _ | / _ \      ║
+║     /    / _/  / /  | |/ |/ / __ |/ , _/      ║
+║    /_/|_/___/ /_/   |__/|__/_/ |_/_/|_|       ║
+║                                 OFFICIAL      ║
+║                                               ║
+╠═══════════════════════════════════════════════╣
+║ Thanks for using our DOCKER image! Should you ║
+║ have issues, please reach out or create a     ║
+║ github issue. Thanks!                         ║
+║                                               ║
+║ For more information:                         ║
+║ github.com/netwarlan                          ║
+╚═══════════════════════════════════════════════╝"
+
+
+## Set default values if none were provided
+## ==============================================
+[[ -z "${PALWORLD_SERVER_UPDATE_ON_START}" ]] && PALWORLD_SERVER_UPDATE_ON_START=true
+[[ -z "${PALWORLD_SERVER_VALIDATE_ON_START}" ]] && PALWORLD_SERVER_VALIDATE_ON_START=false
+
+
+## Update on startup
+## ==============================================
+if [[ "${PALWORLD_SERVER_UPDATE_ON_START}" = true ]] || [[ "${PALWORLD_SERVER_VALIDATE_ON_START}" = true ]]; then
+echo "
+╔═══════════════════════════════════════════════╗
+║ Checking for updates                          ║
+╚═══════════════════════════════════════════════╝"
+  if [[ "${PALWORLD_SERVER_VALIDATE_ON_START}" = true ]]; then
+    VALIDATE_FLAG='validate'
+    echo " - Validating"
+  else
+    VALIDATE_FLAG=''
+  fi
+
+  ${STEAMCMD_DIR}/steamcmd.sh \
+  +force_install_dir ${GAME_DIR} \
+  +login ${STEAMCMD_USER} ${STEAMCMD_PASSWORD} ${STEAMCMD_AUTH_CODE} \
+  +app_update ${STEAMCMD_APP} ${VALIDATE_FLAG} \
+  +quit
+fi
+
+
+
+## Flatten permissions
+## ==============================================
+echo "
+╔═══════════════════════════════════════════════╗
+║ Flatten Permissions                           ║
+╚═══════════════════════════════════════════════╝"
+echo "- Level setting permissions"
+chown ${GAME_USER}:${GAME_USER} -R ${GAME_DIR}
+chmod 770 -R ${GAME_DIR}
+echo "- Level set complete."
+
+
+
+
+
+## Run
+## ==============================================
+echo "
+╔═══════════════════════════════════════════════╗
+║ Starting server                               ║
+╚═══════════════════════════════════════════════╝"
+$GAME_DIR/srcds_run -game palworld -console -usercon
