@@ -23,7 +23,7 @@ echo "
 ## ==============================================
 [[ -z "${PALWORLD_SERVER_UPDATE_ON_START}" ]] && PALWORLD_SERVER_UPDATE_ON_START=true
 [[ -z "${PALWORLD_SERVER_VALIDATE_ON_START}" ]] && PALWORLD_SERVER_VALIDATE_ON_START=false
-
+[[ -z "${PALWORLD_SERVER_CONFIG_URL}" ]] && PALWORLD_SERVER_CONFIG_URL=""
 
 ## Update on startup
 ## ==============================================
@@ -47,6 +47,18 @@ echo "
 fi
 
 
+## Get Server Config
+## ==============================================
+echo "
+╔═══════════════════════════════════════════════╗
+║ Grabbing Config                               ║
+╚═══════════════════════════════════════════════╝"
+echo " - Removing any existing configurations"
+rm ${GAME_DIR}/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+echo " - Downloading config"
+curl -sL ${PALWORLD_SERVER_CONFIG_URL} > ${GAME_DIR}/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+
+
 
 ## Flatten permissions
 ## ==============================================
@@ -62,11 +74,10 @@ echo "- Level set complete."
 
 
 
-
 ## Run
 ## ==============================================
 echo "
 ╔═══════════════════════════════════════════════╗
 ║ Starting server                               ║
 ╚═══════════════════════════════════════════════╝"
-$GAME_DIR/srcds_run -game palworld -console -usercon
+${GAME_DIR}/PalServer.sh
