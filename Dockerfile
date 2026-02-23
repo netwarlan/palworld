@@ -1,5 +1,5 @@
 ## Pull our base image
-FROM debian:12-slim
+FROM debian:13-slim
 
 ## Image Information
 LABEL maintainer="Jeff Nelson <jeff@netwar.org>"
@@ -20,32 +20,31 @@ RUN dpkg --add-architecture i386 \
     && apt update \
     && apt install -y \
         curl \
-        expect \
         lib32gcc-s1 \
-        lib32ncurses5-dev \
+        lib32ncurses-dev \
         lib32stdc++6 \
         lib32z1 \
-        libtinfo5 \
+        libtinfo6 \
         libc6 \
         zlib1g \
-        tcl \
         libsdl2-2.0-0 \
-        libcurl3-gnutls:i386 \
+        libcurl3t64-gnutls:i386 \
         libgdiplus \
         wget \
         unzip \
         sqlite3 \
-        net-tools\
+        net-tools \
+        procps \
     && apt clean \
     && rm -rf /var/tmp/* /var/lib/apt/lists/* /tmp/* \
-
+    \
     ## Create Directory Structure
     && mkdir -p $GAME_DIR \
     && mkdir -p $STEAMCMD_DIR \
-
+    \
     ## Create our User
     && useradd -ms /bin/bash $GAME_USER \
-
+    \
     ## Set Directory Permissions
     && chown -R $GAME_USER:$GAME_USER $GAME_DIR \
     && chown -R $GAME_USER:$GAME_USER $STEAMCMD_DIR
@@ -54,12 +53,11 @@ RUN dpkg --add-architecture i386 \
 USER $GAME_USER
 
 ## Download SteamCMD
-RUN curl -s http://media.steampowered.com/installer/steamcmd_linux.tar.gz | tar -xzC $STEAMCMD_DIR \
+RUN curl -s https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xzC $STEAMCMD_DIR \
     && $STEAMCMD_DIR/steamcmd.sh \
-        +@sSteamCmdForcePlatformType linux \
         +login $STEAMCMD_USER $STEAMCMD_PASSWORD $STEAMCMD_AUTH_CODE \
         +quit \
-
+    \
     ## Create symlinks and appid for Steam
     && mkdir -p ~/.steam/sdk64 \
     && ln -s $STEAMCMD_DIR/linux64/steamclient.so ~/.steam/sdk64/steamclient.so \
@@ -70,6 +68,10 @@ COPY run.sh $APP_DIR/run.sh
 
 ## Set working directory
 WORKDIR $APP_DIR
+
+## Health check to monitor PalServer process
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD pgrep -f PalServer || exit 1
 
 ## Start the run script
 CMD ["bash", "run.sh"]

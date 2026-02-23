@@ -1,3 +1,4 @@
 #!/bin/bash
+set -e
 
-docker build -t netwarlan/palworld .
+docker build -t ghcr.io/netwarlan/palworld "$@" .
