@@ -42,6 +42,8 @@ PALWORLD_SERVER_RCON_ENABLE="${PALWORLD_SERVER_RCON_ENABLE:-False}"
 PALWORLD_SERVER_RCON_PORT="${PALWORLD_SERVER_RCON_PORT:-25575}"
 PALWORLD_SERVER_AUTH="${PALWORLD_SERVER_AUTH:-True}"
 PALWORLD_SERVER_BAN_LIST_URL="${PALWORLD_SERVER_BAN_LIST_URL:-https://api.palworldgame.com/api/banlist.txt}"
+PALWORLD_SERVER_UPDATE_ONLY_THEN_STOP="${PALWORLD_SERVER_UPDATE_ONLY_THEN_STOP:-false}"
+PALWORLD_SERVER_VALIDATE_ONLY_THEN_STOP="${PALWORLD_SERVER_VALIDATE_ONLY_THEN_STOP:-false}"
 PALWORLD_SERVER_REMOTE_CFG="${PALWORLD_SERVER_REMOTE_CFG:-}"
 
 ## Validate numeric inputs
@@ -53,6 +55,29 @@ fi
 if [[ ! "$PALWORLD_SERVER_MAX_PLAYERS" =~ ^[0-9]+$ ]]; then
   echo "Error: PALWORLD_SERVER_MAX_PLAYERS must be a valid number"
   exit 1
+fi
+
+
+## Download game files only (without starting server)
+## ==============================================
+if [[ "$PALWORLD_SERVER_UPDATE_ONLY_THEN_STOP" = true ]] || [[ "$PALWORLD_SERVER_VALIDATE_ONLY_THEN_STOP" = true ]]; then
+echo "
+╔═══════════════════════════════════════════════╗
+║ Downloading game files only                   ║
+╚═══════════════════════════════════════════════╝"
+  if [[ "$PALWORLD_SERVER_VALIDATE_ONLY_THEN_STOP" = true ]]; then
+    VALIDATE_FLAG='validate'
+  else
+    VALIDATE_FLAG=''
+  fi
+
+  "$STEAMCMD_DIR/steamcmd.sh" \
+  +force_install_dir "$GAME_DIR" \
+  +login "$STEAMCMD_USER" "$STEAMCMD_PASSWORD" "$STEAMCMD_AUTH_CODE" \
+  +app_update "$STEAMCMD_APP" $VALIDATE_FLAG \
+  +quit
+
+  exit 0
 fi
 
 

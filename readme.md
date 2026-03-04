@@ -11,9 +11,26 @@ The following repository contains the source files for building a Palworld serve
 To run the container, issue the following example command:
 ```
 docker run -d \
--p 28015:28015/udp \
--p 28015:28015/tcp \
+-p 8211:8211/udp \
+-p 8211:8211/tcp \
 -e PALWORLD_SERVER_NAME="DOCKER PALWORLD" \
+ghcr.io/netwarlan/palworld
+```
+
+### Pre-downloading game files
+To download game files to a volume without starting the server:
+```
+docker run --rm \
+-v palworld-data:/app/palworld \
+-e PALWORLD_SERVER_UPDATE_ONLY_THEN_STOP=true \
+ghcr.io/netwarlan/palworld
+```
+
+To download and validate game files to a volume without starting the server:
+```
+docker run --rm \
+-v palworld-data:/app/palworld \
+-e PALWORLD_SERVER_VALIDATE_ONLY_THEN_STOP=true \
 ghcr.io/netwarlan/palworld
 ```
 
@@ -25,6 +42,8 @@ Environment Variable | Default Value | Description
 -------------------- | ------------- | -----------
 PALWORLD_SERVER_UPDATE_ON_START | true | Update server on startup
 PALWORLD_SERVER_VALIDATE_ON_START | false | Validate server files on startup
+PALWORLD_SERVER_UPDATE_ONLY_THEN_STOP | false | Download/update game files only, then stop (no server start)
+PALWORLD_SERVER_VALIDATE_ONLY_THEN_STOP | false | Download/validate game files only, then stop (no server start)
 PALWORLD_SERVER_DIFFICULTY | None | Adjusts the overall difficulty of the game
 PALWORLD_SERVER_MULTIPLAY | False | Enables or disables multiplayer mode
 PALWORLD_SERVER_PVP | False | Enables or disables player versus player (PvP) mode
